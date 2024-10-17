@@ -4,10 +4,14 @@ import xml.etree.ElementTree as et
 
 class SongSerializer:
     def serialize(self, song, format):
+        serializer = self._get_serializer(format)
+        return serializer(song)
+
+    def _get_serializer(self, format):
         if format == "JSON":
-            return self._serialize_to_json(song)
+            return self._serialize_to_json
         elif format == "XML":
-            return self._serialize_to_xml(song)
+            return self._serialize_to_xml
         else:
             raise ValueError(format)
 
