@@ -1,31 +1,55 @@
 import json
+from typing import Any
 import xml.etree.ElementTree as et
 
 
+class JsonSerializer:
+    def __init__(self):
+        self._current_object = {}
+
+    def start_object(self, object_name, object_id):
+        self._current_object = {
+            "id": object_id,
+            "name": object_name,
+        }
+
+    def add_property(self, name, value):
+        self._current_object[name] = value
+
+    def to_str(self):
+        return json.dumps(self._current_object)
+
+
+class XmlSerializer:
+    def __init__(self):
+        self._element: Any = None
+
+    def start_object(self, object_name, object_id):
+        self._element = et.Element(object_name, attrib={"id": object_id})
+
+    def add_property(self, name, value):
+        prop = et.SubElement(self._element, name)
+        prop.text = value
+
+    def to_str(self):
+        return et.tostring(self._element, encoding="unicode")
+
+
+class SerializerFactory:
+    def get_serializer(self, format):
+        if format == "JSON":
+            return JsonSerializer()
+        elif format == "XML":
+            return XmlSerializer()
+        else:
+            raise ValueError(format)
+
+
+factory = SerializerFactory()
+
+
 class SongSerializer:
-    def serialize(self, song, format):
-        serializer = get_serializer(format)
-        return serializer(song)
-
-
-def get_serializer(format):
-    if format == "JSON":
-        return _serialize_to_json
-    elif format == "XML":
-        return _serialize_to_xml
-    else:
-        raise ValueError(format)
-
-
-def _serialize_to_json(song):
-    payload = {"id": song.song_id, "title": song.title, "artist": song.artist}
-    return json.dumps(payload)
-
-
-def _serialize_to_xml(song):
-    song_element = et.Element("song", attrib={"id": song.song_id})
-    title = et.SubElement(song_element, "title")
-    title.text = song.title
-    artist = et.SubElement(song_element, "artist")
-    artist.text = song.artist
-    return et.tostring(song_element, encoding="unicode")
+    def serialize(self, serializable, format):
+        serializer = factory.get_serializer(format)
+        serializable.serialize(serializer)
+        return serializer.to_str()
