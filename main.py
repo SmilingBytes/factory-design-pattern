@@ -1,12 +1,11 @@
 from song import Song
-from song_serializer import SongSerializer
+from song_serializer import ObjectSerializer
 
 
 def main():
     song = Song("1", "Water of Love", "Dire Straits")
 
-    serializer = SongSerializer()
-
+    serializer = ObjectSerializer()
     print(f'JSON: {serializer.serialize(song, "JSON")}')
     print(f'XML: {serializer.serialize(song, "XML")}')
     # print(f'YAML: {serializer.serialize(song, "YAML")}')
